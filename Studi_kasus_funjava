@@ -1,0 +1,282 @@
+
+
+STUDI KASUS SISTEM INFORMASI KASIR SUPERMARKET "MAJU MAPAN"
+1. Latar Belakang Masalah
+Supermarket Maju Mapan merupakan salah satu ritel modern yang sedang berkembang pesat. Seiring dengan bertambahnya jumlah pelanggan harian, manajemen supermarket menghadapi kendala pada proses transaksi di kasir yang masih menggunakan cara konvensional atau pencatatan manual. Proses ini sering kali memicu beberapa masalah operasional, antara lain:
+•	Kesalahan Penghitungan (Human Error): Kasir sering salah menghitung total subtotal barang belanjaan, terutama ketika pelanggan membeli dalam jumlah banyak dan beragam.
+•	Proses Pengecekan Harga yang Lama: Kasir harus menghafal atau mencari daftar harga secara manual di buku katalog cetak, yang memperlambat antrean di meja kasir.
+•	Kesalahan Penghitungan Diskon dan Kembalian: Kebijakan promosi diskon berjenjang dan perhitungan uang kembalian sering kali keliru jika dihitung secara manual di jam-jam sibuk.
+Untuk mengatasi permasalahan tersebut, manajemen memerlukan sebuah Sistem Aplikasi Kasir Berbasis Konsol (CLI) yang terkomputerisasi menggunakan bahasa pemrograman Java dengan pendekatan Object-Oriented Programming (OOP) agar proses transaksi menjadi lebih cepat, akurat, dan transparan.
+2. Kebutuhan Sistem (System Requirements)
+A. Kebutuhan Fungsional (Functional Requirements)
+1.	Manajemen Katalog Produk: Sistem harus menyediakan data produk awal yang mencakup Kode Barang, Nama Produk, dan Harga Satuan.
+2.	Pencarian Produk Berdasarkan Kode: Kasir dapat memasukkan kode produk (misal: P001) untuk memilih barang yang dibeli secara cepat.
+3.	Pencatatan Keranjang Belanja Dinamis: Sistem harus mampu menampung banyak item belanjaan (multiple items) ke dalam keranjang belanja sementara sebelum dilakukan pembayaran.
+4.	Penerapan Kebijakan Diskon Otomatis: Sistem secara otomatis menghitung potongan harga berdasarkan besaran total belanja:
+o	Belanja $\ge$ Rp 250.000 mendapatkan diskon 15%.
+o	Belanja $\ge$ Rp 100.000 mendapatkan diskon 8%.
+o	Belanja $<$ Rp 100.000 tidak mendapatkan diskon.
+5.	Kalkulasi Pajak PPN: Sistem secara otomatis mengenakan Pajak Pertambahan Nilai (PPN) sebesar 2% dari total setelah diskon.
+6.	Validasi Pembayaran Tunai: Sistem harus memvalidasi uang yang dibayarkan oleh pembeli. Jika uang kurang, sistem akan menolak transaksi dan menampilkan besar kekurangan; jika cukup, sistem akan menghitung uang kembalian.
+7.	Pencetakan Struk Belanja: Sistem menampilkan ringkasan transaksi akhir dalam format teks berbentuk tabel rapi layaknya struk supermarket asli.
+B. Kebutuhan Non-Fungsional (Non-Functional Requirements)
+•	Usabilitas (Usability): Antarmuka berbasis teks (Command Line Interface) yang interaktif, mudah dipahami, serta dilengkapi pemformatan mata uang Rupiah (Rp) agar ramah bagi pengguna awam.
+•	Reliabilitas (Reliability): Memiliki mekanisme validasi input sederhana untuk mencegah crash atau error ketika pengguna salah memasukkan tipe data (misalnya memasukkan huruf pada input angka).
+•	Maintainability: Menggunakan arsitektur berbasis Class (Produk, ItemBelanja, dan KasirMajuMapan) agar kode mudah dirawat, diperbarui, atau dikembangkan di masa mendatang (misal diintegrasikan ke database atau antarmuka GUI/Web).
+3. Alur Kerja Sistem (Workflow)
+1.	Inisialisasi: Saat program dijalankan, objek kasir memuat daftar katalog produk supermarket Maju Mapan ke dalam memori.
+2.	Pemilihan Barang (Looping):
+o	Sistem menampilkan katalog produk terbaru.
+o	Kasir memasukkan Kode Barang dan Jumlah Beli (Quantity).
+o	Sistem memvalidasi kode barang. Jika valid, barang dimasukkan ke keranjang.
+o	Kasir diberi pilihan untuk menambah barang lagi atau mengakhiri sesi belanja.
+3.	Kalkulasi Akhir:
+o	Sistem menjumlahkan seluruh subtotal barang di keranjang.
+o	Sistem menghitung diskon berdasarkan total belanja.
+o	Sistem menghitung PPN 2%.
+o	Sistem menampilkan rincian total akhir yang harus dibayar.
+4.	Pembayaran & Penyelesaian:
+o	Kasir memasukkan nominal uang tunai dari pembeli.
+o	Sistem memvalidasi kecukupan uang.
+o	Jika valid, struk belanja dicetak lengkap dengan nominal kembalian, dan transaksi selesai.
+4. Kesimpulan Studi Kasus
+Penerapan program Java KasirMajuMapan berhasil menyelesaikan permasalahan operasional di Supermarket Maju Mapan. Dengan otomatisasi perhitungan subtotal, diskon berjenjang, pajak, dan kembalian, waktu pelayanan transaksi menjadi jauh lebih efisien, meminimalisir potensi kerugian akibat human error, serta memberikan pengalaman belanja yang profesional bagi pelanggan.
+
+Code Javanya:
+
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+// Kelas untuk merepresentasikan data sebuah item produk
+class Produk {
+    private String kode;
+    private String nama;
+    private double harga;
+
+    public Produk(String kode, String nama, double harga) {
+        this.kode = kode;
+        this.nama = nama;
+        this.harga = harga;
+    }
+
+    public String getKode() { return kode; }
+    public String getNama() { return nama; }
+    public double getHarga() { return harga; }
+}
+
+// Kelas untuk item di dalam keranjang belanja (transaksi)
+class ItemBelanja {
+    private Produk produk;
+    private int jumlah;
+
+    public ItemBelanja(Produk produk, int jumlah) {
+        this.produk = produk;
+        this.jumlah = jumlah;
+    }
+
+    public Produk getProduk() { return produk; }
+    public int getJumlah() { return jumlah; }
+
+    public double getSubtotal() {
+        return produk.getHarga() * jumlah;
+    }
+}
+
+// Kelas Utama Kasir Maju Mapan
+public class KasirMajuMapan {
+    private List<Produk> daftarProduk;
+    private List<ItemBelanja> keranjang;
+    private Scanner scanner;
+    private DecimalFormat formatRupiah;
+
+    public KasirMajuMapan() {
+        daftarProduk = new ArrayList<>();
+        keranjang = new ArrayList<>();
+        scanner = new Scanner(System.in);
+
+        // Inisialisasi Format Mata Uang Rupiah
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setCurrencySymbol("Rp ");
+        symbols.setMonetaryDecimalSeparator(',');
+        symbols.setGroupingSeparator('.');
+        formatRupiah = new DecimalFormat("#,##0", symbols);
+
+        // Menambahkan data produk awal ke sistem supermarket
+        inisialisasiProduk();
+    }
+
+    private void inisialisasiProduk() {
+        daftarProduk.add(new Produk("P001", "Beras Premium 5kg", 75000));
+        daftarProduk.add(new Produk("P002", "Minyak Goreng 2L", 38000));
+        daftarProduk.add(new Produk("P003", "Gula Pasir 1kg", 16500));
+        daftarProduk.add(new Produk("P004", "Telur Ayam 1kg", 28000));
+        daftarProduk.add(new Produk("P005", "Mie Instan (Dus)", 110000));
+        daftarProduk.add(new Produk("P006", "Susu UHT 1L", 19500));
+        daftarProduk.add(new Produk("P007", "Sabun Mandi Batang", 4500));
+        daftarProduk.add(new Produk("P008", "Pasta Gigi", 12000));
+    }
+
+    public void tampilkanKatalog() {
+        System.out.println("\n==================================================");
+        System.out.println("           KATALOG PRODUK SUPERMARKET             ");
+        System.out.println("                 MAJU MAPAN                       ");
+        System.out.println("==================================================");
+        System.out.printf("%-8s | %-22s | %s\n", "KODE", "NAMA PRODUK", "HARGA");
+        System.out.println("--------------------------------------------------");
+        for (Produk p : daftarProduk) {
+            System.out.printf("%-8s | %-22s | %s\n", 
+                p.getKode(), 
+                p.getNama(), 
+                formatRupiah.format(p.getHarga()));
+        }
+        System.out.println("==================================================");
+    }
+
+    public Produk cariProduk(String kode) {
+        for (Produk p : daftarProduk) {
+            if (p.getKode().equalsIgnoreCase(kode)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    public void jalankan() {
+        boolean lanjutBelanja = true;
+
+        System.out.println("==================================================");
+        System.out.println("     SELAMAT DATANG DI SUPERMARKET MAJU MAPAN     ");
+        System.out.println("==================================================");
+
+        while (lanjutBelanja) {
+            tampilkanKatalog();
+            
+            System.out.print("\nMasukkan Kode Barang yang ingin dibeli: ");
+            String kodeInput = scanner.next();
+
+            Produk produkDitemukan = cariProduk(kodeInput);
+            if (produkDitemukan != null) {
+                System.out.println("Produk dipilih: " + produkDitemukan.getNama() + " (" + formatRupiah.format(produkDitemukan.getHarga()) + ")");
+                System.out.print("Masukkan jumlah beli: ");
+                
+                if (scanner.hasNextInt()) {
+                    int jumlahBeli = scanner.nextInt();
+                    if (jumlahBeli > 0) {
+                        keranjang.add(new ItemBelanja(produkDitemukan, jumlahBeli));
+                        System.out.println("-> Berhasil ditambahkan ke keranjang!");
+                    } else {
+                        System.out.println("-> Jumlah beli harus lebih dari 0!");
+                    }
+                } else {
+                    System.out.println("-> Input jumlah tidak valid!");
+                    scanner.next(); // Clear invalid input
+                }
+            } else {
+                System.out.println("-> Maaf, kode produk tidak ditemukan!");
+            }
+
+            System.out.print("\nApakah ingin menambah barang lain? (y/t): ");
+            String pilihan = scanner.next();
+            if (pilihan.equalsIgnoreCase("t")) {
+                lanjutBelanja = false;
+            }
+        }
+
+        // Jika keranjang tidak kosong, proses pembayaran
+        if (!keranjang.isEmpty()) {
+            prosesStrukDanPembayaran();
+        } else {
+            System.out.println("\nKeranjang belanja kosong. Terima kasih telah berkunjung ke Supermarket Maju Mapan.");
+        }
+
+        scanner.close();
+    }
+
+    private void prosesStrukDanPembayaran() {
+        double totalBelanja = 0;
+
+        System.out.println("\n\n==================================================");
+        System.out.println("              STRUK BELANJA SUPERMARKET           ");
+        System.out.println("                     MAJU MAPAN                   ");
+        System.out.println("==================================================");
+        System.out.printf("%-18s | %-5s | %-12s | %s\n", "ITEM", "QTY", "HARGA", "SUBTOTAL");
+        System.out.println("--------------------------------------------------");
+
+        for (ItemBelanja item : keranjang) {
+            totalBelanja += item.getSubtotal();
+            System.out.printf("%-18s | %-5d | %-12s | %s\n",
+                item.getProduk().getNama(),
+                item.getJumlah(),
+                formatRupiah.format(item.getProduk().getHarga()),
+                formatRupiah.format(item.getSubtotal())
+            );
+        }
+
+        System.out.println("--------------------------------------------------");
+        System.out.println("Total Belanja Awal : " + formatRupiah.format(totalBelanja));
+
+        // Kebijakan Diskon Berjenjang Maju Mapan
+        double diskon = 0;
+        String ketDiskon = "Tidak ada";
+        if (totalBelanja >= 250000) {
+            diskon = totalBelanja * 0.15; // Diskon 15% untuk belanja >= 250rb
+            ketDiskon = "15% (Belanja >= Rp 250.000)";
+        } else if (totalBelanja >= 100000) {
+            diskon = totalBelanja * 0.08; // Diskon 8% untuk belanja >= 100rb
+            ketDiskon = "8% (Belanja >= Rp 100.000)";
+        }
+
+        System.out.println("Diskon (" + ketDiskon + ") : " + formatRupiah.format(diskon));
+        
+        // Pajak PPN (Misal 2%)
+        double pajak = (totalBelanja - diskon) * 0.02;
+        System.out.println("PPN (2%)           : " + formatRupiah.format(pajak));
+
+        double totalAkhir = (totalBelanja - diskon) + pajak;
+        System.out.println("==================================================");
+        System.out.println("TOTAL YANG HARUS DIBAYAR : " + formatRupiah.format(totalAkhir));
+        System.out.println("==================================================");
+
+        // Proses Pembayaran Uang Tunai
+        boolean pembayaranValid = false;
+        double uangBayar = 0;
+
+        while (!pembayaranValid) {
+            System.out.print("Masukkan Uang Tunai Pembeli (Rp): ");
+            if (scanner.hasNextDouble()) {
+                uangBayar = scanner.nextDouble();
+                if (uangBayar >= totalAkhir) {
+                    pembayaranValid = true;
+                } else {
+                    System.out.println("-> Uang tidak cukup! Kekurangan sebesar: " + formatRupiah.format(totalAkhir - uangBayar));
+                }
+            } else {
+                System.out.println("-> Masukkan nominal angka yang valid!");
+                scanner.next();
+            }
+        }
+
+        double kembalian = uangBayar - totalAkhir;
+        System.out.println("Uang Tunai Bayar   : " + formatRupiah.format(uangBayar));
+        System.out.println("Uang Kembalian     : " + formatRupiah.format(kembalian));
+        System.out.println("==================================================");
+        System.out.println("     TERIMA KASIH TELAH BERBELANJA DI MAJU MAPAN  ");
+        System.out.println("==================================================");
+    }
+
+    public static void main(String[] args) {
+        KasirMajuMapan kasir = new KasirMajuMapan();
+        kasir.jalankan();
+    }
+}
+
+
+
+
+
+
+
+
